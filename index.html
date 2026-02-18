@@ -24,7 +24,7 @@ const shoulderCenterX =
 
 let result = "良い姿勢なので呼吸しやすいかやってみてください";
 
-if(Math.abs(nose.x - shoulderCenterX) > 0.05){
+if(Math.abs(nose.x - shoulderCenterX) > 0.03){
 result = " 頭が前に出ています（いわゆる猫背）";
 }
 
@@ -84,5 +84,6 @@ upload.onchange = async e=>{
 
 </body>
 </html>
+
 
 
