@@ -13,7 +13,47 @@
 <div id="result" style="font-size:20px;margin-top:15px;"></div>
 
 <script>
+<script>
 function postureJudge(landmarks){
+
+ const nose = landmarks[0];
+ const leftShoulder = landmarks[11];
+ const rightShoulder = landmarks[12];
+ const leftHip = landmarks[23];
+ const rightHip = landmarks[24];
+
+ let messages = [];
+
+ // 首チェック
+ const shoulderCenterX = (leftShoulder.x + rightShoulder.x)/2;
+ if(Math.abs(nose.x - shoulderCenterX) > 0.05){
+   messages.push("ストレートネック傾向ありで首・肩の筋肉が緊張気味です");
+ } else {
+   messages.push(" まっすぐ立てていてグッドです" );
+              
+ }
+
+ // 肩の高さ
+ if(Math.abs(leftShoulder.y - rightShoulder.y) > 0.05){
+   messages.push("🔴 肩の高さに左右差があります");
+ } else {
+   messages.push("🟢 肩の高さは揃っています");
+ }
+
+ // 骨盤バランス
+ if(Math.abs(leftHip.y - rightHip.y) > 0.05){
+   messages.push("🔴 骨盤が傾いています");
+ } else {
+   messages.push("🟢 骨盤バランスは良好です");
+ }
+
+ document.getElementById("result").innerHTML =
+   messages.join("<br>") +
+   "<br><br>気になる方はスタジオオオテキで姿勢チェックがおすすめです 🙂";
+
+}
+</script>
+
 
 const leftShoulder = landmarks[11];
 const rightShoulder = landmarks[12];
@@ -25,7 +65,7 @@ const shoulderCenterX =
 let result = "良い姿勢なので呼吸しやすいかやってみてください";
 
 if(Math.abs(nose.x - shoulderCenterX) > 0.03){
-result = " 頭が前に出ています（いわゆる猫背）";
+result = " 猫背気味です。トレーニングを1種目やってみてください";
 }
 
 document.getElementById("result").innerHTML = result;
@@ -84,6 +124,7 @@ upload.onchange = async e=>{
 
 </body>
 </html>
+
 
 
 
