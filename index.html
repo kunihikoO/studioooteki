@@ -3,12 +3,33 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>姿勢チェック</title>
+<title>スタジオオオテキ的姿勢判定モード</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils"></script>
 
 </head>
+<div id="result" style="font-size:20px;margin-top:15px;"></div>
+
+<script>
+function postureJudge(landmarks){
+
+const leftShoulder = landmarks[11];
+const rightShoulder = landmarks[12];
+const nose = landmarks[0];
+
+const shoulderCenterX =
+(leftShoulder.x + rightShoulder.x)/2;
+
+let result = "良い姿勢なので呼吸しやすいかやってみてください";
+
+if(Math.abs(nose.x - shoulderCenterX) > 0.05){
+result = " 頭が前に出ています（いわゆる猫背）";
+}
+
+document.getElementById("result").innerHTML = result;
+}
+</script>
 
 <body>
 
@@ -42,6 +63,8 @@ pose.onResults(results => {
  if(results.poseLandmarks){
   drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS);
   drawLandmarks(ctx, results.poseLandmarks);
+  postureJudge(results.poseLandmarks);
+
  }
 });
 
@@ -60,3 +83,4 @@ upload.onchange = async e=>{
 
 </body>
 </html>
+
