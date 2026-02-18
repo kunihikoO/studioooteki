@@ -1,77 +1,28 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-<meta charset="utf-8">
-<title>スタジオオオテキ的姿勢判定モード</title>
+<meta charset="UTF-8">
+<title>姿勢セルフチェック</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils"></script>
 
+<style>
+body{
+ font-family:sans-serif;
+ text-align:center;
+}
+canvas{
+ max-width:100%;
+}
+#result{
+ font-size:18px;
+ margin-top:15px;
+}
+</style>
+
 </head>
-<body>
-<div id="result" style="font-size:20px;margin-top:15px;"></div>
-
-<script>
-<script>
- 
-function postureJudge(landmarks){
-
- const nose = landmarks[0];
- const leftShoulder = landmarks[11];
- const rightShoulder = landmarks[12];
- const leftHip = landmarks[23];
- const rightHip = landmarks[24];
-
- let messages = [];
-
- // 首チェック
- const shoulderCenterX = (leftShoulder.x + rightShoulder.x)/2;
- if(Math.abs(nose.x - shoulderCenterX) > 0.05){
-   messages.push("ストレートネック傾向ありで首・肩の筋肉が緊張気味です");
- } else {
-   messages.push(" まっすぐ立てていてグッドです" );
-              
- }
-
- // 肩の高さ
- if(Math.abs(leftShoulder.y - rightShoulder.y) > 0.05){
-   messages.push("🔴 肩の高さに左右差があります");
- } else {
-   messages.push("🟢 肩の高さは揃っています");
- }
-
- // 骨盤バランス
- if(Math.abs(leftHip.y - rightHip.y) > 0.05){
-   messages.push("🔴 骨盤が傾いています");
- } else {
-   messages.push("🟢 骨盤バランスは良好です");
- }
-
- document.getElementById("result").innerHTML =
-   messages.join("<br>") +
-   "<br><br>気になる方はスタジオオオテキで姿勢チェックがおすすめです 🙂";
-
-}
-</script>
-
-
-const leftShoulder = landmarks[11];
-const rightShoulder = landmarks[12];
-const nose = landmarks[0];
-
-const shoulderCenterX =
-(leftShoulder.x + rightShoulder.x)/2;
-
-let result = "良い姿勢なので呼吸しやすいかやってみてください";
-
-if(Math.abs(nose.x - shoulderCenterX) > 0.03){
-result = " 猫背気味です。トレーニングを1種目やってみてください";
-}
-
-document.getElementById("result").innerHTML = result;
-}
-</script>
 
 <body>
 
@@ -83,6 +34,8 @@ document.getElementById("result").innerHTML = result;
 
 <canvas id="canvas"></canvas>
 
+<div id="result"></div>
+
 <script>
 
 const upload = document.getElementById("upload");
@@ -90,48 +43,79 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 const pose = new Pose({
- locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+ locateFile:file=>"https://cdn.jsdelivr.net/npm/@mediapipe/pose/"+file
 });
 
 pose.setOptions({
- modelComplexity: 1,
- smoothLandmarks: true
+ modelComplexity:1,
+ smoothLandmarks:true
 });
 
-pose.onResults(results => {
+pose.onResults(onResults);
+
+function postureJudge(lm){
+
+ const nose = lm[0];
+ const ls = lm[11];
+ const rs = lm[12];
+ const lh = lm[23];
+ const rh = lm[24];
+
+ let messages=[];
+
+ // 首
+ const center=(ls.x+rs.x)/2;
+ if(Math.abs(nose.x-center)>0.05){
+  messages.push("🔴 首が前に出ています");
+ }else{
+  messages.push("🟢 首の位置は良好");
+ }
+
+ // 肩
+ if(Math.abs(ls.y-rs.y)>0.05){
+  messages.push("🔴 肩の高さが左右で違います");
+ }else{
+  messages.push("🟢 肩は水平です");
+ }
+
+ // 骨盤
+ if(Math.abs(lh.y-rh.y)>0.05){
+  messages.push("🔴 骨盤が傾いています");
+ }else{
+  messages.push("🟢 骨盤バランス良好");
+ }
+
+ document.getElementById("result").innerHTML=
+  messages.join("<br>")+
+  "<br><br>気になる方はスタジオオオテキで姿勢チェックがおすすめです 🙂";
+}
+
+function onResults(r){
+
  ctx.clearRect(0,0,canvas.width,canvas.height);
- ctx.drawImage(results.image,0,0);
+ ctx.drawImage(r.image,0,0);
 
- if(results.poseLandmarks){
-  drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS);
-  drawLandmarks(ctx, results.poseLandmarks);
-   document.getElementById("result").innerHTML =
-   messages.join("<br>") +
-   "<br><br>気になる方はスタジオオオテキで姿勢チェックがおすすめです 🙂";
-
-}
-
-
- }
-});
-
-upload.onchange = async e=>{
- const img = new Image();
- img.src = URL.createObjectURL(e.target.files[0]);
-
- img.onload = async ()=>{
-  canvas.width = img.width;
-  canvas.height = img.height;
-  await pose.send({image: img});
+ if(r.poseLandmarks){
+  drawConnectors(ctx,r.poseLandmarks,POSE_CONNECTIONS);
+  drawLandmarks(ctx,r.poseLandmarks);
+  postureJudge(r.poseLandmarks);
  }
 }
+
+upload.onchange=e=>{
+ const img=new Image();
+ img.src=URL.createObjectURL(e.target.files[0]);
+ img.onload=async()=>{
+  canvas.width=img.width;
+  canvas.height=img.height;
+  await pose.send({image:img});
+ }
+};
 
 </script>
 
 </body>
 </html>
-
-
 
 
 
