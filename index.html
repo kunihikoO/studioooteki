@@ -14,6 +14,7 @@
 
 <script>
 <script>
+ 
 function postureJudge(landmarks){
 
  const nose = landmarks[0];
@@ -104,7 +105,12 @@ pose.onResults(results => {
  if(results.poseLandmarks){
   drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS);
   drawLandmarks(ctx, results.poseLandmarks);
-  postureJudge(results.poseLandmarks);
+   document.getElementById("result").innerHTML =
+   messages.join("<br>") +
+   "<br><br>気になる方はスタジオオオテキで姿勢チェックがおすすめです 🙂";
+
+}
+
 
  }
 });
@@ -124,6 +130,7 @@ upload.onchange = async e=>{
 
 </body>
 </html>
+
 
 
 
